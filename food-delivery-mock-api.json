@@ -1,0 +1,418 @@
+{
+  "name": "Arabic Voice Agent — Food Delivery Outbound Calls (Mock API)",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "demoeats/v1/outbound-calls/context",
+        "authentication": "headerAuth",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "7bd4e09a-f5aa-4b11-81eb-a8ba02ae1aeb",
+      "name": "Webhook - outbound-calls/context",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $input.first().json;\nconst q = r.query || {};\nconst b = r.body || {};\nconst h = r.headers || {};\nconst callId = h['x-correlation-id'] || q.callId || b.callId || 'call_out_10';\nconst TS = '2026-07-21T12:20:00Z';\nconst ok = data => [{ json: { success: true, data, meta: { correlationId: callId, timestamp: TS } } }];\nconst fail = (code, message, retryable = false, details = {}) => [{ json: { success: false, error: { code, message, retryable, details }, meta: { correlationId: callId, timestamp: TS } } }];\n// Test error paths: ?mockError=1 or header x-mock-error: 1\nif (String(q.mockError) === '1' || h['x-mock-error'] === '1') return fail('ORDER_NOT_FOUND', 'No matching active order was found.');\nconst customer = { customerId: 'cus_10021', preferredName: 'محمد', phoneNumber: '+966500000321', locale: 'ar-SA' };\nconst SCENARIOS = {\n  call_out_10: { callType: 'OUT_OF_STOCK', order: { orderId: 'ord_78125', restaurantName: 'Demo Burger' },\n    trigger: { reasonCode: 'ITEM_UNAVAILABLE', itemId: 'itm_7', delayMinutes: null }, scriptVariables: { itemName: 'برجر لحم' } },\n  call_out_20: { callType: 'DELAY_NOTIFICATION', order: { orderId: 'ord_78125', restaurantName: 'Demo Burger' },\n    trigger: { reasonCode: 'DELAY_OVER_30_MINUTES', itemId: null, delayMinutes: 31 }, scriptVariables: {} },\n  call_out_30: { callType: 'FEEDBACK', order: { orderId: 'ord_77001', restaurantName: 'Demo Burger' },\n    trigger: { reasonCode: 'POST_DELIVERY_SURVEY', itemId: null, delayMinutes: null }, scriptVariables: {} }\n};\nconst s = SCENARIOS[callId] || SCENARIOS.call_out_10;\nreturn ok({ callType: s.callType, customer, order: s.order, trigger: s.trigger, scriptVariables: s.scriptVariables });\n"
+      },
+      "id": "2077461b-c9d3-4397-a7e6-e98ce66beab0",
+      "name": "Build - outbound-calls/context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        288,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "demoeats/v1/customers/verify",
+        "authentication": "headerAuth",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "38df8128-0132-4e5e-9f7b-edeef0329487",
+      "name": "Webhook - customers/verify",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $input.first().json;\nconst q = r.query || {};\nconst b = r.body || {};\nconst h = r.headers || {};\nconst callId = h['x-correlation-id'] || q.callId || b.callId || 'call_001';\nconst TS = '2026-07-21T12:16:02Z';\nconst ok = data => [{ json: { success: true, data, meta: { correlationId: callId, timestamp: TS } } }];\nconst fail = (code, message, retryable = false, details = {}) => [{ json: { success: false, error: { code, message, retryable, details }, meta: { correlationId: callId, timestamp: TS } } }];\n// Test error paths: ?mockError=1 or header x-mock-error: 1\nif (String(q.mockError) === '1' || h['x-mock-error'] === '1') return fail('ORDER_NOT_FOUND', 'No matching active order was found.');\nreturn ok({ verified: true, verificationToken: 'ver_demo_7f3a9c', expiresAt: '2026-07-21T12:20:30Z', attemptsRemaining: 2 });\n"
+      },
+      "id": "405af561-e49a-4991-8f17-55c00d443226",
+      "name": "Build - customers/verify",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        288,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "path": "demoeats/v1/orders/context",
+        "authentication": "headerAuth",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "99214235-48de-4246-8ef5-c8103f8ce505",
+      "name": "Webhook - orders/context",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $input.first().json;\nconst q = r.query || {};\nconst b = r.body || {};\nconst h = r.headers || {};\nconst callId = h['x-correlation-id'] || q.callId || b.callId || 'call_001';\nconst TS = '2026-07-21T12:16:18Z';\nconst ok = data => [{ json: { success: true, data, meta: { correlationId: callId, timestamp: TS } } }];\nconst fail = (code, message, retryable = false, details = {}) => [{ json: { success: false, error: { code, message, retryable, details }, meta: { correlationId: callId, timestamp: TS } } }];\n// Test error paths: ?mockError=1 or header x-mock-error: 1\nif (String(q.mockError) === '1' || h['x-mock-error'] === '1') return fail('ORDER_NOT_FOUND', 'No matching active order was found.');\nreturn ok({\n  orderId: q.orderId || 'ord_78125', status: 'ON_THE_WAY', restaurantName: 'Demo Burger',\n  promisedDeliveryAt: '2026-07-21T12:05:00Z', etaMinutes: 18, delayMinutes: 31, delayReasonCode: 'RESTAURANT_DELAY',\n  items: [\n    { itemId: 'itm_1', name: 'برجر لحم', quantity: 1, paidAmount: 32.00, availabilityStatus: 'AVAILABLE' },\n    { itemId: 'itm_2', name: 'مشروب كولا', quantity: 1, paidAmount: 7.00, availabilityStatus: 'AVAILABLE' }\n  ],\n  totalAmount: 74.50, currency: 'SAR'\n});\n"
+      },
+      "id": "7f2be2e1-e717-49bf-8753-f1f475d2289d",
+      "name": "Build - orders/context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        288,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "path": "demoeats/v1/orders/resolution-options",
+        "authentication": "headerAuth",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "90a25ec0-1ccc-4bcf-a6d9-4d593061705a",
+      "name": "Webhook - orders/resolution-options",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $input.first().json;\nconst q = r.query || {};\nconst b = r.body || {};\nconst h = r.headers || {};\nconst callId = h['x-correlation-id'] || q.callId || b.callId || 'call_003';\nconst TS = '2026-07-21T12:17:03Z';\nconst ok = data => [{ json: { success: true, data, meta: { correlationId: callId, timestamp: TS } } }];\nconst fail = (code, message, retryable = false, details = {}) => [{ json: { success: false, error: { code, message, retryable, details }, meta: { correlationId: callId, timestamp: TS } } }];\n// Test error paths: ?mockError=1 or header x-mock-error: 1\nif (String(q.mockError) === '1' || h['x-mock-error'] === '1') return fail('ORDER_NOT_FOUND', 'No matching active order was found.');\n// The backend, not the LLM, decides which actions the agent may offer.\nconst allowedActions = q.issueType === 'MISSING_ITEM' ? ['REFUND_ITEM'] : ['REPLACE_ITEM', 'REMOVE_ITEM'];\nreturn ok({\n  eligible: true, allowedActions, refundableAmount: 24.00,\n  replacementOptions: [\n    { replacementItemId: 'menu_901', name: 'دجاج مشوي', priceDelta: 0.00, currency: 'SAR' },\n    { replacementItemId: 'menu_902', name: 'لحم مشوي', priceDelta: 6.00, currency: 'SAR' }\n  ],\n  expiresAt: '2026-07-21T12:23:00Z'\n});\n"
+      },
+      "id": "f93bf685-7b6a-4dd5-8ab0-e1f78483ad6a",
+      "name": "Build - orders/resolution-options",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        288,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "demoeats/v1/orders/apply-resolution",
+        "authentication": "headerAuth",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "8c0ea174-cef7-4dec-8371-8ef8503b2886",
+      "name": "Webhook - orders/apply-resolution",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        768
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $input.first().json;\nconst q = r.query || {};\nconst b = r.body || {};\nconst h = r.headers || {};\nconst callId = h['x-correlation-id'] || q.callId || b.callId || 'call_003';\nconst TS = '2026-07-21T12:18:10Z';\nconst ok = data => [{ json: { success: true, data, meta: { correlationId: callId, timestamp: TS } } }];\nconst fail = (code, message, retryable = false, details = {}) => [{ json: { success: false, error: { code, message, retryable, details }, meta: { correlationId: callId, timestamp: TS } } }];\n// Test error paths: ?mockError=1 or header x-mock-error: 1\nif (String(q.mockError) === '1' || h['x-mock-error'] === '1') return fail('ORDER_NOT_FOUND', 'No matching active order was found.');\n// Guardrail: no money-moving action without a verified customer.\nif (!String(b.verificationToken || '').startsWith('ver_')) return fail('VERIFICATION_REQUIRED', 'Verify the customer before taking this action.');\nconst base = { resolutionId: 'res_30018', status: 'APPLIED', refundId: null, refundAmount: null, expectedPostingDays: null };\nconst RESULTS = {\n  REPLACE_ITEM: { updatedTotal: 74.50, updatedEtaMinutes: 22, notificationsQueued: ['RESTAURANT', 'COURIER'] },\n  REFUND_ITEM:  { refundId: 'rfd_44012', refundAmount: 7.00, expectedPostingDays: 3, updatedTotal: 67.50, updatedEtaMinutes: null, notificationsQueued: ['RESTAURANT'] },\n  REMOVE_ITEM:  { updatedTotal: 67.50, updatedEtaMinutes: 22, notificationsQueued: ['RESTAURANT', 'COURIER'] },\n  CANCEL_ORDER: { updatedTotal: 0.00, updatedEtaMinutes: null, notificationsQueued: ['RESTAURANT', 'COURIER'] }\n};\nif (!RESULTS[b.action]) return fail('INVALID_ACTION', 'Unknown resolution action.', false, { allowed: Object.keys(RESULTS) });\nreturn ok({ ...base, ...RESULTS[b.action] });\n"
+      },
+      "id": "c89d06c6-b3ab-4df7-acfe-a259fc454317",
+      "name": "Build - orders/apply-resolution",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        288,
+        768
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "demoeats/v1/compensations/evaluate",
+        "authentication": "headerAuth",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "6f8605df-409d-44d6-9026-8cdab7946ce4",
+      "name": "Webhook - compensations/evaluate",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        960
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $input.first().json;\nconst q = r.query || {};\nconst b = r.body || {};\nconst h = r.headers || {};\nconst callId = h['x-correlation-id'] || q.callId || b.callId || 'call_001';\nconst TS = '2026-07-21T12:16:30Z';\nconst ok = data => [{ json: { success: true, data, meta: { correlationId: callId, timestamp: TS } } }];\nconst fail = (code, message, retryable = false, details = {}) => [{ json: { success: false, error: { code, message, retryable, details }, meta: { correlationId: callId, timestamp: TS } } }];\n// Test error paths: ?mockError=1 or header x-mock-error: 1\nif (String(q.mockError) === '1' || h['x-mock-error'] === '1') return fail('ORDER_NOT_FOUND', 'No matching active order was found.');\nreturn ok({\n  eligible: true, grantType: 'VOUCHER', suggestedAmount: 20.00, maxAmount: 20.00, currency: 'SAR',\n  policyId: 'pol_delay_30m_v1', reasonCode: 'DELAY_OVER_30_MINUTES', customerPeriodTotal: 20.00, customerPeriodLimit: 100.00\n});\n"
+      },
+      "id": "ce657ec4-0984-48da-a55b-3adae779eb75",
+      "name": "Build - compensations/evaluate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        288,
+        960
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "demoeats/v1/vouchers/grant",
+        "authentication": "headerAuth",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "9a1118b2-eab2-46d7-a78e-527b394b82c0",
+      "name": "Webhook - vouchers/grant",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        1152
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $input.first().json;\nconst q = r.query || {};\nconst b = r.body || {};\nconst h = r.headers || {};\nconst callId = h['x-correlation-id'] || q.callId || b.callId || 'call_001';\nconst TS = '2026-07-21T12:17:12Z';\nconst ok = data => [{ json: { success: true, data, meta: { correlationId: callId, timestamp: TS } } }];\nconst fail = (code, message, retryable = false, details = {}) => [{ json: { success: false, error: { code, message, retryable, details }, meta: { correlationId: callId, timestamp: TS } } }];\n// Test error paths: ?mockError=1 or header x-mock-error: 1\nif (String(q.mockError) === '1' || h['x-mock-error'] === '1') return fail('ORDER_NOT_FOUND', 'No matching active order was found.');\n// Guardrail: no money-moving action without a verified customer.\nif (!String(b.verificationToken || '').startsWith('ver_')) return fail('VERIFICATION_REQUIRED', 'Verify the customer before taking this action.');\n// Guardrail: enforce policy limits server-side, whatever amount the agent requests.\nconst POLICY = { maxAmount: 20.00, periodLimit: 100.00, periodTotalSoFar: 20.00 };\nconst amount = (b.amount != null) ? Number(b.amount) : POLICY.maxAmount;\nif (!(amount > 0)) return fail('INVALID_AMOUNT', 'Amount must be a positive number.');\nif (amount > POLICY.maxAmount) return fail('AMOUNT_EXCEEDS_POLICY', 'Requested amount is above the policy maximum.', false, { maxAmount: POLICY.maxAmount });\nif (POLICY.periodTotalSoFar + amount > POLICY.periodLimit) return fail('PERIOD_LIMIT_REACHED', 'Customer has reached the compensation limit for this period.', false, { periodLimit: POLICY.periodLimit });\nreturn ok({\n  voucherGrantId: 'vgr_88012', voucherCodeMasked: 'DME-****-9012', amount, currency: b.currency || 'SAR',\n  expiresAt: '2026-08-20T23:59:59Z', status: 'GRANTED',\n  customerTotalGranted: POLICY.periodTotalSoFar + amount, customerPeriodTotal: POLICY.periodTotalSoFar + amount\n});\n"
+      },
+      "id": "70723d01-ddf1-40af-8a23-4fb016f3bf5f",
+      "name": "Build - vouchers/grant",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        288,
+        1152
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "demoeats/v1/feedback",
+        "authentication": "headerAuth",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "c4caddf8-7e0a-4e32-a8e9-e9d25e3270ff",
+      "name": "Webhook - feedback",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        1344
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $input.first().json;\nconst q = r.query || {};\nconst b = r.body || {};\nconst h = r.headers || {};\nconst callId = h['x-correlation-id'] || q.callId || b.callId || 'call_out_30';\nconst TS = '2026-07-21T13:05:20Z';\nconst ok = data => [{ json: { success: true, data, meta: { correlationId: callId, timestamp: TS } } }];\nconst fail = (code, message, retryable = false, details = {}) => [{ json: { success: false, error: { code, message, retryable, details }, meta: { correlationId: callId, timestamp: TS } } }];\n// Test error paths: ?mockError=1 or header x-mock-error: 1\nif (String(q.mockError) === '1' || h['x-mock-error'] === '1') return fail('ORDER_NOT_FOUND', 'No matching active order was found.');\nconst rating = (b.rating != null) ? Number(b.rating) : 2;\nlet result;\nif (rating <= 2) result = { sentiment: 'NEGATIVE', followUpRequired: true, priority: 'MEDIUM', categories: ['LATE_DELIVERY', 'FOOD_TEMPERATURE'], summary: 'Customer reported a late delivery and cold food.' };\nelse if (rating === 3) result = { sentiment: 'NEUTRAL', followUpRequired: false, priority: 'LOW', categories: [], summary: 'Customer gave a neutral rating.' };\nelse result = { sentiment: 'POSITIVE', followUpRequired: false, priority: 'LOW', categories: [], summary: 'Customer was satisfied with the delivery.' };\nreturn ok({ feedbackId: 'fb_55019', rating, ...result });\n"
+      },
+      "id": "be0ff139-032a-4afd-a103-89233089bc3a",
+      "name": "Build - feedback",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        288,
+        1344
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "demoeats/v1/tickets",
+        "authentication": "headerAuth",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "dc1fe0c4-09a6-4a14-92dd-a984b67f6a6a",
+      "name": "Webhook - tickets",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        1536
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $input.first().json;\nconst q = r.query || {};\nconst b = r.body || {};\nconst h = r.headers || {};\nconst callId = h['x-correlation-id'] || q.callId || b.callId || 'call_out_30';\nconst TS = '2026-07-21T13:05:25Z';\nconst ok = data => [{ json: { success: true, data, meta: { correlationId: callId, timestamp: TS } } }];\nconst fail = (code, message, retryable = false, details = {}) => [{ json: { success: false, error: { code, message, retryable, details }, meta: { correlationId: callId, timestamp: TS } } }];\n// Test error paths: ?mockError=1 or header x-mock-error: 1\nif (String(q.mockError) === '1' || h['x-mock-error'] === '1') return fail('ORDER_NOT_FOUND', 'No matching active order was found.');\nreturn ok({ ticketId: 'TKT-20491', status: 'OPEN', priority: b.priority || 'MEDIUM', assignedQueue: 'DELIVERY_EXPERIENCE', createdAt: TS });\n"
+      },
+      "id": "bdb66aca-bfa6-4972-bf17-01343d9a27fc",
+      "name": "Build - tickets",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        288,
+        1536
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "demoeats/v1/calls/complete",
+        "authentication": "headerAuth",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "f581ba25-336f-4507-a53a-3e7b871db846",
+      "name": "Webhook - calls/complete",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        1728
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $input.first().json;\nconst q = r.query || {};\nconst b = r.body || {};\nconst h = r.headers || {};\nconst callId = h['x-correlation-id'] || q.callId || b.callId || 'call_001';\nconst TS = '2026-07-21T12:18:00Z';\nconst ok = data => [{ json: { success: true, data, meta: { correlationId: callId, timestamp: TS } } }];\nconst fail = (code, message, retryable = false, details = {}) => [{ json: { success: false, error: { code, message, retryable, details }, meta: { correlationId: callId, timestamp: TS } } }];\n// Test error paths: ?mockError=1 or header x-mock-error: 1\nif (String(q.mockError) === '1' || h['x-mock-error'] === '1') return fail('ORDER_NOT_FOUND', 'No matching active order was found.');\nreturn ok({ saved: true, callRecordId: 'cr_90921', outboundTaskStatus: b.direction === 'OUTBOUND' ? 'COMPLETED' : null, completedAt: TS });\n"
+      },
+      "id": "eb2b2542-e617-4d00-b2a4-bb1eb49322a1",
+      "name": "Build - calls/complete",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        288,
+        1728
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook - outbound-calls/context": {
+      "main": [
+        [
+          {
+            "node": "Build - outbound-calls/context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - customers/verify": {
+      "main": [
+        [
+          {
+            "node": "Build - customers/verify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - orders/context": {
+      "main": [
+        [
+          {
+            "node": "Build - orders/context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - orders/resolution-options": {
+      "main": [
+        [
+          {
+            "node": "Build - orders/resolution-options",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - orders/apply-resolution": {
+      "main": [
+        [
+          {
+            "node": "Build - orders/apply-resolution",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - compensations/evaluate": {
+      "main": [
+        [
+          {
+            "node": "Build - compensations/evaluate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - vouchers/grant": {
+      "main": [
+        [
+          {
+            "node": "Build - vouchers/grant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - feedback": {
+      "main": [
+        [
+          {
+            "node": "Build - feedback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - tickets": {
+      "main": [
+        [
+          {
+            "node": "Build - tickets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - calls/complete": {
+      "main": [
+        [
+          {
+            "node": "Build - calls/complete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
